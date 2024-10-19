@@ -8,12 +8,21 @@ from kivy.config import Config
 import time; 
 import requests; 
 import json; 
+from kivy.uix.label import Label
+from kivy.core.window import Window
+from amadeus import Client, Location, ResponseError
+import requests
 
-params = {
 
-    'grant_type': 'client_credentials&client_id={client_id}&client_secret={client_secret}',
-}
-response = requests.get("https://test.api.amadeus.com/v1/security/oauth2/token") 
+amadeus = Client(
+    client_id='awcKZ2oK2A6umtnIhzKHE1SGC9LcDNkF',
+    client_secret='gFBeJtNGyTWAuxkI'
+)
+
+response = amadeus.travel.predictions.flight_delay.get(originLocationCode='ORD',
+destinationLocationCode='LHR', departureDate='2024-10-19', carrierCode='BA', flightNumber='296')
+
+print(response.data)
 
 KV = '''
 ScreenManager:
@@ -53,8 +62,7 @@ class MainScreen(Screen):
 class MainApp(MDApp):
     def build(self):
         self.start_time = time.time()
-        self.title = "My KivyMD App"
-        self.window.size = (800, 600)
+        Window.size = (400, 600)
         return Builder.load_string(KV)
 
     def on_button_press(self):
