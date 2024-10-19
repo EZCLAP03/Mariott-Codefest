@@ -5,24 +5,24 @@ from kivymd.app import MDApp
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.textfield import MDTextField
 from kivy.config import Config
-import time; 
-import requests; 
-import json; 
+import time
+import requests
+import json
 from kivy.uix.label import Label
 from kivy.core.window import Window
 from amadeus import Client, Location, ResponseError
-import requests
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+
+client_id = os.getenv('AMADEUS_CLIENT_ID')
+client_secret = os.getenv('AMADEUS_CLIENT_SECRET')
 
 amadeus = Client(
-    client_id='awcKZ2oK2A6umtnIhzKHE1SGC9LcDNkF',
-    client_secret='gFBeJtNGyTWAuxkI'
+    client_id=client_id,
+    client_secret=client_secret
 )
-
-response = amadeus.travel.predictions.flight_delay.get(originLocationCode='ORD',
-destinationLocationCode='LHR', departureDate='2024-10-19', carrierCode='BA', flightNumber='296')
-
-print(response.data)
 
 KV = '''
 ScreenManager:

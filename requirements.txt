@@ -1,0 +1,5 @@
+kivy
+kivymd
+requests
+amadeus
+python-dotenv
