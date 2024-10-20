@@ -16,7 +16,6 @@ from kivy.graphics import Color, Line
 from io import BytesIO
 from kivy.core.image import Image as CoreImage
 from kivy.uix.image import Image
-from kivy.graphics.texture import Texture
 from kivy.uix.image import Image as KivyImage
 import numpy as np
 from pytrends.request import TrendReq
