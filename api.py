@@ -17,7 +17,7 @@ def get_score(state: str):
     response = requests.get(url)
     data = response.json()
     if 'error' in data:
-        return "State not found"
+        return data['error']
     # example response {'Environmental Score': 0.8799876675480947, 'State': 'West Virginia'}
     # return ENV score
     return data['Environmental Score']
@@ -39,18 +39,26 @@ def get_news(region: str):
     """
     Get bad news for a region, return the url of the first news article
     """
-    if(region == ''):
+    if region == '':
         return "Invalid input for region"
+    
     badNews = ['hurricane', 'tornado', 'earthquake', 'flood', 'wildfire']
     keyword = random.choice(badNews)
     url = f"https://newsapi.org/v2/everything?q={region}%20{keyword}&sortBy=relevancy&apiKey={os.getenv('NEWS_API_KEY')}"
     response = requests.get(url)
     data = response.json()
+
     if 'error' in data:
         return "Region not found"
-    # if no data gain from api
+    
+    # if no data gained from API
     if data['totalResults'] == 0:
-        return "No news found"
-    # example response {"status": "ok", "totalResults": 168, "articles": [ { "source": {  "id": null, "name": "The Conversation Africa" }, "author": "Verna Kale, Associate Editor, The Letters of Ernest Hemingway and Associate Research Professor of English, Penn State","title": "Hemingway, after the hurricane","description": "In 1935, a hurricane devastated the Florida Keys, killing over 400 people, many of them World War I veterans. Ernest Hemingway joined the relief efforts – and became enraged at government inaction.","url": "https://theconversation.com/hemingway-after-the-hurricane-241103","urlToImage": "https://images.theconversation.com/files/626545/original/file-20241017-15-5pkmv4.jpg?ixlib=rb-4.1.0&rect=0%2C408%2C3614%2C1807&q=45&auto=format&w=1356&h=668&fit=crop", "publishedAt": "2024-10-18T12:23:20Z","content": "Rescue workers search debris for victims of the Labor Day hurricane of 1935, a Category 5 storm that devastated parts of the Florida Keys. Bettman/Getty Images\r\nThe 2024 hurricane season has been esp… [+6579 chars]"},etc.
-    # extract first news article url
-    return data['articles'][0]['title'], data['articles'][0]['url']
+        return "No news found", "No news found"
+    
+    # Find the first valid article that is not removed
+    for article in data['articles']:
+        if article['title'] != "[Removed]" and article['url'] != "https://removed.com":
+            return article['title'], article['url']
+    
+    # If no valid article is found
+    return "No news found", "No news found"
