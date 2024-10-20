@@ -17,7 +17,7 @@ def get_score(state: str):
     response = requests.get(url)
     data = response.json()
     if 'error' in data:
-        return "State not found"
+        return data['error']
     # example response {'Environmental Score': 0.8799876675480947, 'State': 'West Virginia'}
     # return ENV score
     return data['Environmental Score']
