@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-import dotenv
 import random
 from dotenv import load_dotenv
 import os
@@ -14,7 +13,7 @@ def get_score(state: str):
     """
     Get environmental score for a state, return the score(int)
     """
-    url = f"https://api.w1111am.xyz:8443/get_score?state={state}"
+    url = f"https://api.w1111am.xyz:8443/get_score?state={state}&password={os.getenv('ESG_SECRET_KEY')}"
     response = requests.get(url)
     data = response.json()
     if 'error' in data:
@@ -54,4 +53,4 @@ def get_news(region: str):
         return "No news found"
     # example response {"status": "ok", "totalResults": 168, "articles": [ { "source": {  "id": null, "name": "The Conversation Africa" }, "author": "Verna Kale, Associate Editor, The Letters of Ernest Hemingway and Associate Research Professor of English, Penn State","title": "Hemingway, after the hurricane","description": "In 1935, a hurricane devastated the Florida Keys, killing over 400 people, many of them World War I veterans. Ernest Hemingway joined the relief efforts – and became enraged at government inaction.","url": "https://theconversation.com/hemingway-after-the-hurricane-241103","urlToImage": "https://images.theconversation.com/files/626545/original/file-20241017-15-5pkmv4.jpg?ixlib=rb-4.1.0&rect=0%2C408%2C3614%2C1807&q=45&auto=format&w=1356&h=668&fit=crop", "publishedAt": "2024-10-18T12:23:20Z","content": "Rescue workers search debris for victims of the Labor Day hurricane of 1935, a Category 5 storm that devastated parts of the Florida Keys. Bettman/Getty Images\r\nThe 2024 hurricane season has been esp… [+6579 chars]"},etc.
     # extract first news article url
-    return data['articles'][0]['url']
+    return data['articles'][0]['title'], data['articles'][0]['url']
