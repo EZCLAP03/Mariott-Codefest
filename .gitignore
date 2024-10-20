@@ -1,5 +1,4 @@
 .venv/
-.env
 cache/
 __pycache__/
 hel.csv
@@ -12,3 +11,5 @@ uscounties.csv
 temperature.csv
 offering.json
 review.json
+/dist/
+/build/
