@@ -36,17 +36,17 @@ ScreenManager:
     FloatLayout:
         orientation: 'vertical'
         MDLabel:
-            text: "Optimum"
+            text: "SiteScout"
             halign: "center"
             theme_text_color: "Custom"
-            text_color: 1, 1, 1, 1
+            text_color: 0.5, 0.5, 0.5, 1  
             font_style: "H4"
-            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            pos_hint: {"center_x": 0.5, "center_y": 0.8}
             font_name: "Arial"
         MDTextField:
             id: search_field
             hint_text: "Enter State"
-            pos_hint: {"center_x": 0.51, "center_y": 0.8}
+            pos_hint: {"center_x": 0.51, "center_y": 0.6}
             size_hint_x: None
             icon_left: "layers-search-outline"
             width: 300
@@ -54,22 +54,16 @@ ScreenManager:
             font_name: "Roboto-Regular"
         MDRectangleFlatButton:
             text: "Submit"
-            pos_hint: {"center_x": 0.5, "center_y": 0.6}
-            size_hint_x: None
-            width: 200
-            on_release: app.on_button_press()
-            font_name: "Roboto-Regular"
-        MDRectangleFlatButton:
-            text: "Open Map"
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
-            size_hint_x: None
-            width: 200
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            size_hint: None, None
+            width: 300
+            height: 50
             on_release: app.create_map()
             font_name: "Roboto-Regular"
         MDTextField:
             id: search_field_2
             hint_text: "Enter County"
-            pos_hint: {"center_x": 0.51, "center_y": 0.7}
+            pos_hint: {"center_x": 0.51, "center_y": 0.5}
             size_hint_x: None
             icon_left: "layers-search-outline"
             width: 300
@@ -77,9 +71,9 @@ ScreenManager:
             font_name: "Roboto-Regular"
         MDRectangleFlatButton:
             text: "Open Graph"
-            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            pos_hint: {"center_x": 0.5, "center_y": 0.3}
             size_hint_x: None
-            width: 200
+            width: 300
             on_release: app.open_graph()
             font_name: "Roboto-Regular"
 
@@ -89,6 +83,7 @@ ScreenManager:
         orientation: 'vertical'
         FloatLayout:
             id: map_box
+            size_hint_y: 0.5  
         MDIconButton:
             icon: "close"
             size_hint: None, None
@@ -103,14 +98,14 @@ ScreenManager:
     FloatLayout:
         orientation: 'vertical'
         id: graph_box
-        MDIconButton:
-            icon: "close"
-            size_hint: None, None
-            size: dp(48), dp(48)
-            pos_hint: {"x": 0, "y": 0.9}
-            on_release: app.root.current = 'main'
-            theme_text_color: "Custom"
-            text_color: 1, 1, 1, 1
+    MDIconButton:
+        icon: "close"
+        size_hint: None, None
+        size: dp(48), dp(48)
+        pos_hint: {"x": 0, "y": 0.9}
+        on_release: app.root.current = 'main'
+        theme_text_color: "Custom"
+        text_color: 0, 0, 0, 1
 '''
 
 class MainScreen(Screen):
@@ -151,7 +146,7 @@ class GraphScreen(Screen):
         plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
         plt.plot(interest_over_time_df.index, interest_over_time_df[state_text])
        
-        plt.title(f'Trends Data for {state_text}')
+        plt.title(f'Google Trends Data for {state_text}')
         plt.xlabel('Time')
         plt.ylabel('Value')
         plt.tight_layout()
@@ -212,7 +207,8 @@ class MainApp(MDApp):
         
         return Builder.load_string(KV)
 
-    def on_button_press(self):
+
+    def create_map(self):
         state = self.root.get_screen('main').ids.search_field
         state_text = state.text
         state1 = self.root.get_screen('main').ids.search_field_2
@@ -221,58 +217,49 @@ class MainApp(MDApp):
         
         input_x = get_ai(f'{state_text1}', f'{state_text}')
         prediction = predict(input_x)
-        lol = round(prediction, 3)
+        lol = float(prediction)
+        lol = round(lol, 2)
 
 
         if hasattr(self, 'state_label') and self.state_label:
-            self.root.get_screen('main').remove_widget(self.state_label)
-        if hasattr(self, 'state_label1') and self.state_label1:
-            self.root.get_screen('main').remove_widget(self.state_label1)
+            self.root.get_screen('map').remove_widget(self.state_label)
+
         
         esg_score = api.get_score(state_text)
         if esg_score == "State not found":
             esg_score = "does not exist"
         else:
-            esg_score = round(esg_score, 3)
+            esg_score = round(esg_score, 2)
         self.state_label = MDLabel(
-            text=f"[color=#AAAAAA]ESG score: {esg_score}[/color]",
+            text=f"[color=#AAAAAA]ESG Score: {esg_score}/10[/color]",
             markup=True,
             halign="center",
             theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.3},
+            pos_hint={"center_x": 0.5, "center_y": 0.7},
             font_name="Roboto-Regular",
+            font_size="120sp"  # Increased font size
         )
         
-        news = api.get_news(state_text1)
-        self.state_label1 = MDLabel(
-            text=f"[color=#AAAAAA]News: {news[0]}[/color]",
-            markup=True,
-            halign="center",
-            theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.1},
-            font_name="Roboto-Regular",
-        )
+
+        if hasattr(self, 'state_label3') and self.state_label3:
+            self.root.get_screen('map').remove_widget(self.state_label3)
 
         self.state_label3 = MDLabel(
-            text=f"[color=#AAAAAA]Prediction: {lol}[/color]",
+            text=f"[color=#AAAAAA]Predicted Location Score: {lol}/10[/color]",
             markup=True,
             halign="center",
             theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.2},
+            pos_hint={"center_x": 0.5, "center_y": 0.9},
             font_name="Roboto-Regular",
+            font_size="120sp"  # Increased font size
         )
-        self.root.get_screen('main').add_widget(self.state_label)
-        self.root.get_screen('main').add_widget(self.state_label1)
-        self.root.get_screen('main').add_widget(self.state_label3)
-
-
-    def create_map(self):
+        self.root.get_screen('map').add_widget(self.state_label)
+        self.root.get_screen('map').add_widget(self.state_label3)
         self.root.current = 'map'
         map_box = self.root.get_screen('map').ids.map_box
         map_box.clear_widgets()
 
         map_label = MDLabel(
-            
             halign="center",
             theme_text_color="Primary"
         )
