@@ -4,15 +4,15 @@ import random
 from dotenv import load_dotenv
 import os
 load_dotenv()
+import pytrends
+from pytrends.request import TrendReq
+
 
 
 df = pd.read_csv('temperatures.csv', header=None, names=['County', 'State'])
 df2 = pd.read_csv('uscounties.csv', header=None, names=['County', 'State', 'Latitude', 'Longitude'])
 
 def get_score(state: str):
-    """
-    Get environmental score for a state, return the score(int)
-    """
     url = f"https://api.w1111am.xyz:8443/get_score?state={state}&password={os.getenv('ESG_SECRET_KEY')}"
     response = requests.get(url)
     data = response.json()
@@ -36,13 +36,10 @@ def get_longtitude(county, state):
     return result['Longitude'].values[0]
 
 def get_news(region: str):
-    """
-    Get bad news for a region, return the url of the first news article
-    """
     if region == '':
         return "Invalid input for region"
     
-    badNews = ['hurricane', 'tornado', 'earthquake', 'flood', 'wildfire']
+    badNews = ['hurricane', 'tornado', 'earthquake', 'flood', 'drought', 'tsunami', 'volcano', 'blizzard', 'avalanche', 'heatwave', 'coldwave', 'storm', 'cyclone', 'typhoon', 'landslide', 'sinkhole']
     keyword = random.choice(badNews)
     url = f"https://newsapi.org/v2/everything?q={region}%20{keyword}&sortBy=relevancy&apiKey={os.getenv('NEWS_API_KEY')}"
     response = requests.get(url)
@@ -51,14 +48,23 @@ def get_news(region: str):
     if 'error' in data:
         return "Region not found"
     
-    # if no data gained from API
     if data['totalResults'] == 0:
         return "No news found", "No news found"
     
-    # Find the first valid article that is not removed
     for article in data['articles']:
         if article['title'] != "[Removed]" and article['url'] != "https://removed.com":
             return article['title'], article['url']
     
-    # If no valid article is found
     return "No news found", "No news found"
+
+def fetch_trends_data(region: str):
+    pytrends = TrendReq(hl='en-US', tz=360)
+    pytrends.build_payload([region], timeframe='now 7-d', geo='US')
+    data = pytrends.interest_over_time()
+    data_cleaned = data.dropna()
+ 
+    return data_cleaned.values
+
+print(fetch_trends_data('Alaska'))
+
+

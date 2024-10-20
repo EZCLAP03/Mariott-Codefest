@@ -12,40 +12,72 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy_garden.mapview import MapView, MapMarker
 import api
+from kivy.graphics import Color, Line
+from io import BytesIO
+from kivy.core.image import Image as CoreImage
+from kivy.uix.image import Image
+from kivy.graphics.texture import Texture
+from kivy.uix.image import Image as KivyImage
+import numpy as np
+from pytrends.request import TrendReq
 
 KV = '''
 ScreenManager:
     MainScreen:
     MapScreen:
+    GraphScreen:
 
 <MainScreen>:
     name: 'main'
     FloatLayout:
         orientation: 'vertical'
+        MDLabel:
+            text: "Optimum"
+            halign: "center"
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+            font_style: "H4"
+            pos_hint: {"center_x": 0.5, "center_y": 0.9}
+            font_name: "Arial"
         MDTextField:
             id: search_field
             hint_text: "Enter State"
-            pos_hint: {"center_x": 0.51, "center_y": 0.7}
+            pos_hint: {"center_x": 0.51, "center_y": 0.8}
             size_hint_x: None
             icon_left: "layers-search-outline"
             width: 300
             on_text: app.give_suggestions()
+            font_name: "Roboto-Regular"
         MDRectangleFlatButton:
             text: "Submit"
-            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            pos_hint: {"center_x": 0.5, "center_y": 0.6}
+            size_hint_x: None
+            width: 200
             on_release: app.on_button_press()
+            font_name: "Roboto-Regular"
         MDRectangleFlatButton:
             text: "Open Map"
-            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            pos_hint: {"center_x": 0.5, "center_y": 0.5}
+            size_hint_x: None
+            width: 200
             on_release: app.create_map()
+            font_name: "Roboto-Regular"
         MDTextField:
             id: search_field_2
             hint_text: "Enter County"
-            pos_hint: {"center_x": 0.51, "center_y": 0.6}
+            pos_hint: {"center_x": 0.51, "center_y": 0.7}
             size_hint_x: None
             icon_left: "layers-search-outline"
             width: 300
             on_text: app.give_suggestions2()
+            font_name: "Roboto-Regular"
+        MDRectangleFlatButton:
+            text: "Open Graph"
+            pos_hint: {"center_x": 0.5, "center_y": 0.4}
+            size_hint_x: None
+            width: 200
+            on_release: app.open_graph()
+            font_name: "Roboto-Regular"
 
 <MapScreen>:
     name: 'map'
@@ -53,12 +85,28 @@ ScreenManager:
         orientation: 'vertical'
         FloatLayout:
             id: map_box
-        MDRaisedButton:
-            text: "Back"
+        MDIconButton:
+            icon: "close"
             size_hint: None, None
-            size: 100, 50
-            pos_hint: {"center_x": 0.5, "center_y": 0.1}
-            on_release: app.root.current = 'main'  
+            size: dp(48), dp(48)
+            pos_hint: {"x": 0, "y": 0.9}
+            on_release: app.root.current = 'main'
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
+
+<GraphScreen>:
+    name: 'graph'
+    FloatLayout:
+        orientation: 'vertical'
+        id: graph_box
+        MDIconButton:
+            icon: "close"
+            size_hint: None, None
+            size: dp(48), dp(48)
+            pos_hint: {"x": 0, "y": 0.9}
+            on_release: app.root.current = 'main'
+            theme_text_color: "Custom"
+            text_color: 1, 1, 1, 1
 '''
 
 class MainScreen(Screen):
@@ -77,13 +125,60 @@ class MapScreen(Screen):
         map_marker = MapMarker(lat=lats, lon=long)
         map_view.add_marker(map_marker)
         self.ids.map_box.add_widget(map_view)
-        back_button = MDRaisedButton(
-                text="Back",
-                size_hint=(None, None),  
-                size=(100, 50),  
-                pos_hint={"center_x": 0.5, "center_y": 0.1},  
-                on_release=lambda _: print("Back button pressed")  
-            )
+
+class GraphScreen(Screen):
+    def on_enter(self):
+        pytrends = TrendReq(hl='en-US', tz=360)
+
+    # Build the payload for the location
+
+    # Retrieve interest over time
+        main_screen = self.manager.get_screen('main')
+        state_text = main_screen.ids.search_field.text
+        county_text = main_screen.ids.search_field_2.text
+        pytrends.build_payload(kw_list=[state_text], timeframe='today 12-m', geo='US')
+        interest_over_time_df = pytrends.interest_over_time()
+
+
+
+        # Get the screen dimensions
+        screen_width, screen_height = Window.size
+
+        # Adjust the figure size to fit the screen resolution
+        dpi = 100  # Dots per inch
+        fig_width = screen_width / dpi
+        fig_height = screen_height / dpi
+
+        # Fetch the data from api.py
+
+        # Plot the data using matplotlib
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
+        plt.plot(interest_over_time_df.index, interest_over_time_df[state_text])
+       
+        plt.title(f'Trends Data for {state_text}')
+        plt.xlabel('Time')
+        plt.ylabel('Value')
+        plt.tight_layout()
+        plt.xticks(rotation=45)
+
+
+
+        # Save the plot to a BytesIO object
+        buf = BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        plt.close()
+
+        # Load the plot into a Kivy texture
+        texture = CoreImage(buf, ext='png').texture
+
+        # Create a Kivy Image widget to display the plot
+        graph_image = KivyImage(texture=texture)
+
+        # Add the Kivy Image widget to the graph_box
+        self.ids.graph_box.add_widget(graph_image)
+
   
 
 
@@ -174,8 +269,19 @@ class MainApp(MDApp):
             theme_text_color="Primary"
         )
         map_box.add_widget(map_label)
-    def go_back(self):
-        self.root.current = 'main'
+
+    def open_graph(self):
+        self.root.current = 'graph'
+        graph_box = self.root.get_screen('graph').ids.graph_box
+        graph_box.clear_widgets()
+        map_label = MDLabel(
+            
+            halign="center",
+            theme_text_color="Primary"
+        )
+        graph_box.add_widget(map_label)
+
+    
 
     def give_suggestions(self):
         if hasattr(self, 'dropdown'):
