@@ -3,10 +3,9 @@ import pandas as pd
 import random
 from dotenv import load_dotenv
 import os
-load_dotenv()
 import pytrends
 from pytrends.request import TrendReq
-
+load_dotenv()
 
 
 df = pd.read_csv('temperatures.csv', header=None, names=['County', 'State'])
@@ -51,11 +50,16 @@ def get_news(region: str):
     if data['totalResults'] == 0:
         return "No news found", "No news found"
     
-    for article in data['articles']:
-        if article['title'] != "[Removed]" and article['url'] != "https://removed.com":
-            return article['title'], article['url']
+    valid_articles = [
+        article for article in data['articles']
+        if article['title'] != "[Removed]" and article['url'] != "https://removed.com"
+    ]
     
-    return "No news found", "No news found"
+    if valid_articles:
+        chosen_article = random.choice(valid_articles)
+        return chosen_article['title'], chosen_article['url']
+    
+    return "No valid news found", "No valid news found"
 
 def fetch_trends_data(region: str):
     pytrends = TrendReq(hl='en-US', tz=360)
@@ -64,7 +68,3 @@ def fetch_trends_data(region: str):
     data_cleaned = data.dropna()
  
     return data_cleaned.values
-
-print(fetch_trends_data('Alaska'))
-
-

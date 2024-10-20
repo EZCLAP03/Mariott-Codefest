@@ -5,3 +5,5 @@ amadeus
 python-dotenv
 pandas
 kivy_garden.mapview
+feedparser
+pytrends
