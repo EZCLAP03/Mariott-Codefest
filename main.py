@@ -129,9 +129,13 @@ class MainApp(MDApp):
     def on_button_press(self):
         state = self.root.get_screen('main').ids.search_field
         state_text = state.text
+        state1 = self.root.get_screen('main').ids.search_field_2
+        state_text1 = state1.text
         
         if hasattr(self, 'state_label') and self.state_label:
             self.root.get_screen('main').remove_widget(self.state_label)
+        if hasattr(self, 'state_label1') and self.state_label1:
+            self.root.get_screen('main').remove_widget(self.state_label1)
         
         esg_score = api.get_score(state_text)
         if esg_score == "State not found":
@@ -146,7 +150,18 @@ class MainApp(MDApp):
             pos_hint={"center_x": 0.5, "center_y": 0.3},
             font_name="Roboto-Regular",
         )
+
+        news = api.get_news(state_text1)
+        self.state_label1 = MDLabel(
+            text=f"[color=#AAAAAA]News: {news[0]}[/color]",
+            markup=True,
+            halign="center",
+            theme_text_color="Primary",
+            pos_hint={"center_x": 0.5, "center_y": 0.1},
+            font_name="Roboto-Regular",
+        )
         self.root.get_screen('main').add_widget(self.state_label)
+        self.root.get_screen('main').add_widget(self.state_label1)
 
     def create_map(self):
         self.root.current = 'map'
@@ -181,7 +196,7 @@ class MainApp(MDApp):
                 size_hint_y=None,
                 height='44dp',
                 background_normal='',
-                background_color=(0.2, 0.6, 0.8, 1),  
+                background_color=(0.5, 0.5, 0.5, 1),  
                 color=(1, 1, 1, 1),
                 font_size='16sp',
                 border=(16, 16, 16, 16) 
@@ -215,7 +230,7 @@ class MainApp(MDApp):
                 size_hint_y=None,
                 height='44dp',
                 background_normal='',
-                background_color=(0.2, 0.6, 0.8, 1),  
+                background_color=(0.5, 0.5, 0.5, 1),  
                 color=(1, 1, 1, 1),
                 font_size='16sp',
                 border=(16, 16, 16, 16) 
