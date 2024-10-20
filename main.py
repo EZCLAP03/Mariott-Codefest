@@ -20,6 +20,10 @@ from kivy.graphics.texture import Texture
 from kivy.uix.image import Image as KivyImage
 import numpy as np
 from pytrends.request import TrendReq
+from modelDeploy import get_ai
+from modelDeploy import predict
+import matplotlib.pyplot as plt
+
 
 KV = '''
 ScreenManager:
@@ -130,9 +134,7 @@ class GraphScreen(Screen):
     def on_enter(self):
         pytrends = TrendReq(hl='en-US', tz=360)
 
-    # Build the payload for the location
 
-    # Retrieve interest over time
         main_screen = self.manager.get_screen('main')
         state_text = main_screen.ids.search_field.text
         county_text = main_screen.ids.search_field_2.text
@@ -140,19 +142,12 @@ class GraphScreen(Screen):
         interest_over_time_df = pytrends.interest_over_time()
 
 
-
-        # Get the screen dimensions
         screen_width, screen_height = Window.size
 
-        # Adjust the figure size to fit the screen resolution
-        dpi = 100  # Dots per inch
+        dpi = 100  
         fig_width = screen_width / dpi
         fig_height = screen_height / dpi
 
-        # Fetch the data from api.py
-
-        # Plot the data using matplotlib
-        import matplotlib.pyplot as plt
         plt.figure(figsize=(fig_width, fig_height), dpi=dpi)
         plt.plot(interest_over_time_df.index, interest_over_time_df[state_text])
        
@@ -163,17 +158,13 @@ class GraphScreen(Screen):
         plt.xticks(rotation=45)
 
 
-
-        # Save the plot to a BytesIO object
         buf = BytesIO()
         plt.savefig(buf, format='png')
         buf.seek(0)
         plt.close()
 
-        # Load the plot into a Kivy texture
         texture = CoreImage(buf, ext='png').texture
 
-        # Create a Kivy Image widget to display the plot
         graph_image = KivyImage(texture=texture)
 
         # Add the Kivy Image widget to the graph_box
@@ -226,7 +217,13 @@ class MainApp(MDApp):
         state_text = state.text
         state1 = self.root.get_screen('main').ids.search_field_2
         state_text1 = state1.text
+
         
+        input_x = get_ai(f'{state_text1}', f'{state_text}')
+        prediction = predict(input_x)
+        lol = round(prediction, 3)
+
+
         if hasattr(self, 'state_label') and self.state_label:
             self.root.get_screen('main').remove_widget(self.state_label)
         if hasattr(self, 'state_label1') and self.state_label1:
@@ -245,7 +242,7 @@ class MainApp(MDApp):
             pos_hint={"center_x": 0.5, "center_y": 0.3},
             font_name="Roboto-Regular",
         )
-
+        
         news = api.get_news(state_text1)
         self.state_label1 = MDLabel(
             text=f"[color=#AAAAAA]News: {news[0]}[/color]",
@@ -255,8 +252,19 @@ class MainApp(MDApp):
             pos_hint={"center_x": 0.5, "center_y": 0.1},
             font_name="Roboto-Regular",
         )
+
+        self.state_label3 = MDLabel(
+            text=f"[color=#AAAAAA]Prediction: {lol}[/color]",
+            markup=True,
+            halign="center",
+            theme_text_color="Primary",
+            pos_hint={"center_x": 0.5, "center_y": 0.2},
+            font_name="Roboto-Regular",
+        )
         self.root.get_screen('main').add_widget(self.state_label)
         self.root.get_screen('main').add_widget(self.state_label1)
+        self.root.get_screen('main').add_widget(self.state_label3)
+
 
     def create_map(self):
         self.root.current = 'map'
