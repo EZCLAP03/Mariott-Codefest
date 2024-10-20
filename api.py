@@ -3,7 +3,6 @@ import pandas as pd
 import random
 from dotenv import load_dotenv
 import os
-import pytrends
 from pytrends.request import TrendReq
 load_dotenv()
 

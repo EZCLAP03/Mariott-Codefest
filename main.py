@@ -12,7 +12,6 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 from kivy_garden.mapview import MapView, MapMarker
 import api
-from kivy.graphics import Color, Line
 from io import BytesIO
 from kivy.core.image import Image as CoreImage
 from kivy.uix.image import Image
