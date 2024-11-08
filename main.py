@@ -232,10 +232,12 @@ class MainApp(MDApp):
             text=f"[color=#AAAAAA]ESG Score: {esg_score}/10[/color]",
             markup=True,
             halign="center",
-            theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.7},
+            font_style="H5",
+            color=(0.5, 0.5, 0.5, 1),
+            pos_hint={"center_x": 0.5, "center_y": 0.6},
             font_name="Roboto-Regular",
-            font_size="120sp"  # Increased font size
+            font_size="120sp",  # Increased font size
+            bold="True", 
         )
         
 
@@ -245,11 +247,14 @@ class MainApp(MDApp):
         self.state_label3 = MDLabel(
             text=f"[color=#AAAAAA]Predicted Location Score: {lol}/10[/color]",
             markup=True,
+            font_style="H5",
             halign="center",
             theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.9},
+            pos_hint={"center_x": 0.5, "center_y": 0.8},
             font_name="Roboto-Regular",
-            font_size="120sp"  # Increased font size
+            font_size="120sp",  # Increased font size
+            bold="True",
+            color=(0.5, 0.5, 0.5, 1)
         )
         self.root.get_screen('map').add_widget(self.state_label)
         self.root.get_screen('map').add_widget(self.state_label3)
