@@ -81,7 +81,6 @@ ScreenManager:
         orientation: 'vertical'
         FloatLayout:
             id: map_box
-            size_hint_y: 0.5  
         MDIconButton:
             icon: "close"
             size_hint: None, None
@@ -159,12 +158,7 @@ class GraphScreen(Screen):
         texture = CoreImage(buf, ext='png').texture
 
         graph_image = KivyImage(texture=texture)
-
-        # Add the Kivy Image widget to the graph_box
         self.ids.graph_box.add_widget(graph_image)
-
-  
-
 
 
 Window.size = (360, 640) 
@@ -212,61 +206,61 @@ class MainApp(MDApp):
         state1 = self.root.get_screen('main').ids.search_field_2
         state_text1 = state1.text
 
-        
         input_x = get_ai(f'{state_text1}', f'{state_text}')
         prediction = predict(input_x)
         lol = float(prediction)
         lol = round(lol, 2)
 
-
         if hasattr(self, 'state_label') and self.state_label:
             self.root.get_screen('map').remove_widget(self.state_label)
 
-        
         esg_score = api.get_score(state_text)
         if esg_score == "State not found":
             esg_score = "does not exist"
         else:
             esg_score = round(esg_score, 2)
-        self.state_label = MDLabel(
-            text=f"[color=#AAAAAA]ESG Score: {esg_score}/10[/color]",
-            markup=True,
-            halign="center",
-            font_style="H5",
-            color=(0.5, 0.5, 0.5, 1),
-            pos_hint={"center_x": 0.5, "center_y": 0.6},
-            font_name="Roboto-Regular",
-            font_size="120sp",  # Increased font size
-            bold="True", 
-        )
         
-
-        if hasattr(self, 'state_label3') and self.state_label3:
-            self.root.get_screen('map').remove_widget(self.state_label3)
+        self.state_label = MDLabel(
+            text=f"[color=#000000]ESG Score: {esg_score}/10[/color]",
+            markup=True,
+            halign="left",  
+            font_style="H5",
+            color=(0, 0, 0, 1),
+            pos_hint={"x": 0, "y": -0.2},  
+            font_name="Roboto-Regular",
+            font_size="20sp",  
+            bold=True,
+        )
 
         self.state_label3 = MDLabel(
-            text=f"[color=#AAAAAA]Predicted Location Score: {lol}/10[/color]",
+            text=f"[color=#000000]Predicted Location Score: {lol}/10[/color]",
             markup=True,
             font_style="H5",
-            halign="center",
+            halign="left",  
             theme_text_color="Primary",
-            pos_hint={"center_x": 0.5, "center_y": 0.8},
+            pos_hint={"x": 0, "y": -0.1},  
             font_name="Roboto-Regular",
-            font_size="120sp",  # Increased font size
-            bold="True",
-            color=(0.5, 0.5, 0.5, 1)
+            font_size="20sp",  
+            bold=True,
+            color=(0, 0, 0, 1)
         )
-        self.root.get_screen('map').add_widget(self.state_label)
-        self.root.get_screen('map').add_widget(self.state_label3)
-        self.root.current = 'map'
+
+
         map_box = self.root.get_screen('map').ids.map_box
         map_box.clear_widgets()
+        
+        lats = api.get_latitude(state_text1, state_text)
+        long = api.get_longtitude(state_text1, state_text)
+        map_view = MapView(zoom=10, lat=float(lats), lon=float(long))
+        map_marker = MapMarker(lat=float(lats), lon=float(long))
+        map_view.add_marker(map_marker)
+        map_box.add_widget(map_view)
+        
 
-        map_label = MDLabel(
-            halign="center",
-            theme_text_color="Primary"
-        )
-        map_box.add_widget(map_label)
+        self.root.get_screen('map').add_widget(self.state_label)
+        self.root.get_screen('map').add_widget(self.state_label3)
+        
+        self.root.current = 'map'
 
     def open_graph(self):
         self.root.current = 'graph'
