@@ -4,9 +4,9 @@
 a = Analysis(
     ['main.py'],
     pathex=[],
-    binaries=[('C:\\\\Users\\\\haris\\\\Desktop\\\\Mariott Codefest\\\\.venv\\\\Lib\\\\site-packages\\\\xgboost\\\\lib\\\\xgboost.dll', './xgboost/lib')],
-    datas=[('*.csv', '.'), ('C:\\\\Users\\\\haris\\\\Desktop\\\\Mariott Codefest\\\\.venv\\\\Lib\\\\site-packages\\\\kivymd', './kivymd'), ('C:\\\\Users\\\\haris\\\\Desktop\\\\Mariott Codefest\\\\.venv\\\\Lib\\\\site-packages\\\\xgboost\\\\VERSION', './xgboost'), ('.env', '.')],
-    hiddenimports=[],
+    binaries=[],
+    datas=[],
+    hiddenimports=['kivymd.icons', 'kivymd', 'kivy'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -16,23 +16,22 @@ a = Analysis(
 )
 pyz = PYZ(a.pure)
 
-exe = EXE(
-    pyz,
-    a.scripts,
+
+exe = EXE(pyz, Tree('C:\Users\haris\Desktop\Mariott Codefest\'),
+     a.scripts,
+     a.binaries,
+     a.zipfiles,
+     a.datas,
+     *[Tree(p) for p in (sdl2.dep_bins + glew.dep_bins)],
+     upx=True,
+     name='touchtracer')
+
+coll = COLLECT(
+    exe,
     a.binaries,
     a.datas,
-    [],
-    name='main',
-    debug=False,
-    bootloader_ignore_signals=False,
     strip=False,
     upx=True,
     upx_exclude=[],
-    runtime_tmpdir=None,
-    console=True,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
+    name='main',
 )

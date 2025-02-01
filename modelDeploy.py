@@ -157,6 +157,7 @@ def predict(final_features):
     prediction_df = 1 + ((prediction_df - 4) / (4.6-4)) * 9
     prediction_df = np.clip(prediction_df, 1, 10)
     
-    return prediction_df.values[0][0]
+    output = prediction_df.values[0][0]
+    return output
 
 
